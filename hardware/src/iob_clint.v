@@ -56,7 +56,7 @@ module iob_clint
 
 
    reg	[9:0]	counter;
-   always @(posedge clk, posedge rst)
+  always @(posedge clk, posedge rst) //timer tick every 100_000_000/100_000 = 1000 turns
       if (rst) begin
         counter <= 1'b0;
       end else if (counter < `FREQ/100000-1)
@@ -64,7 +64,7 @@ module iob_clint
      	else
      		counter <= 0;
 
-   reg increment_timer;
+   reg increment_timer; //1000 turns
    always @(posedge clk, posedge rst)
       if (rst) begin
         increment_timer <= 1'b0;
@@ -107,7 +107,7 @@ module iob_clint
            mtip[k] = {1'b0};
         end
       else
-        for (k=0; k < N_CORES; k=k+1) begin
+        for (k=0; k < N_CORES; k=k+1) begin //go high only when mtime>cmp
            mtip[k] = (mtime >= mtimecmp[k][63:0]);
         end
    end
@@ -128,9 +128,9 @@ module iob_clint
    always @(posedge clk, posedge rst) begin
       if (rst) begin
          mtime <= {64{1'b0}};
-      end else if (valid && write && (address >= MTIME_BASE) && (address < (MTIME_BASE+8))) begin
+      end else if (valid && write && (address >= MTIME_BASE) && (address < (MTIME_BASE+8))) begin //write to mtime CSR (memory-mapped)
          mtime[(address[2]+1)*DATA_W-1 -: DATA_W] <= wdata;
-      end else if (increment_timer) begin
+      end else if (increment_timer) begin //increase mtime
          mtime <= mtime + 1'b1;
       end
    end
